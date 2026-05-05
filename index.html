@@ -2,34 +2,188 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Mini Web Harmonium</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
+    <meta name="format-detection" content="telephone=no,date=no,email=no,address=no">
+    <meta name="HandheldFriendly" content="true">
+    <meta name="MobileOptimized" content="width">
+    <title>Skribbl.io 28</title>
     <link rel="stylesheet" href="style.css">
+    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body>
-    <div id="welcome-screen">
-        <button id="start-btn">Open Harmonium</button>
-    </div>
 
-    <div class="harmonium-container">
-        <h1>Mini Harmonium</h1>
-        <div class="keyboard" id="keyboard">
-            <div class="key white" data-note="C4"><span>C</span></div>
-            <div class="key black" data-note="C#4"></div>
-            <div class="key white" data-note="D4"><span>D</span></div>
-            <div class="key black" data-note="D#4"></div>
-            <div class="key white" data-note="E4"><span>E</span></div>
-            <div class="key white" data-note="F4"><span>F</span></div>
-            <div class="key black" data-note="F#4"></div>
-            <div class="key white" data-note="G4"><span>G</span></div>
-            <div class="key black" data-note="G#4"></div>
-            <div class="key white" data-note="A4"><span>A</span></div>
-            <div class="key black" data-note="A#4"></div>
-            <div class="key white" data-note="B4"><span>B</span></div>
+<!-- ==================== LOGIN SCREEN ==================== -->
+<div id="loginScreen">
+    <div class="login-scroll">
+        <div class="login-container">
+            <div class="logo-section">
+                <div class="logo-icon">🎨</div>
+                <h1>Skribbl.io 28</h1>
+                <p class="tagline">Draw, guess, and have fun!</p>
+            </div>
+            <div class="login-box">
+                <div class="input-group">
+                    <label for="playerName">Your Name</label>
+                    <input type="text" id="playerName" placeholder="Enter your name" maxlength="12"
+                           autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false">
+                    <span class="input-hint">Max 12 characters</span>
+                </div>
+                <div class="input-group">
+                    <label for="roomCode">Room Code</label>
+                    <input type="text" id="roomCode" placeholder="Leave empty to create new room" maxlength="8"
+                           autocomplete="off" autocorrect="off" autocapitalize="characters" spellcheck="false">
+                    <span class="input-hint">Join existing room or create new</span>
+                </div>
+                <button onclick="joinGame()" class="play-btn">
+                    <span>Play Now</span><span>🚀</span>
+                </button>
+                <div class="feature-list">
+                    <span>✏️ Real-time drawing</span>
+                    <span>💬 Live chat</span>
+                    <span>🏆 Score points</span>
+                </div>
+            </div>
+            <div class="footer-text">Made with ❤️ | Free to play</div>
         </div>
-        <p class="controls">Use Mouse or Keys: A S D F G H J</p>
+    </div>
+</div>
+
+<!-- ==================== GAME SCREEN ==================== -->
+<div id="gameScreen">
+
+    <!-- Top Bar -->
+    <div class="top-bar">
+        <div class="top-left">
+            <button class="home-btn" onclick="exitGame()">🏠</button>
+        </div>
+        <div class="top-center">
+            <div class="game-status">
+                <span id="roundInfo">Round 1/10</span>
+                <span class="divider">|</span>
+                <span class="timer-display" id="timerDisplay">80</span>
+            </div>
+            <div class="word-area">
+                <span class="word-display" id="wordDisplay">Waiting...</span>
+            </div>
+        </div>
+        <div class="top-right">
+            <span class="room-code-small" id="roomCodeDisplay">----</span>
+        </div>
     </div>
 
-    <script src="script.js"></script>
+    <!-- Canvas Section: fixed pixel size, overlays inside -->
+    <div class="canvas-section" id="canvasSection">
+        <canvas id="gameCanvas"></canvas>
+
+        <div class="drawer-badge" id="drawerBadge">✏️ You're Drawing!</div>
+
+        <div class="waiting-overlay" id="waitingOverlay">
+            <div class="spinner"></div>
+            <p>Waiting for drawer to choose a word...</p>
+        </div>
+
+        <div class="round-overlay" id="roundOverlay">
+            <div class="round-content">
+                <div class="round-title">⏱ Round Over!</div>
+                <div class="word-reveal">The word was:<br><span id="revealedWord">---</span></div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Toolbar (shown only for drawer) -->
+    <div class="toolbar-wrap" id="toolbarWrap">
+        <button class="tool-btn" id="colorBtn"><div class="color-preview" id="colorPreview"></div></button>
+        <button class="tool-btn" id="sizeBtn">⚫</button>
+        <button class="tool-btn active" id="brushBtn">✏️</button>
+        <button class="tool-btn" id="eraserBtn">🧼</button>
+        <button class="tool-btn" id="bucketBtn">🪣</button>
+        <button class="tool-btn" id="undoBtn">↩️</button>
+        <button class="tool-btn danger" id="clearBtn">🗑️</button>
+    </div>
+
+    <!-- Bottom: Players left, Chat right -->
+    <div class="bottom-section">
+        <div class="players-panel">
+            <div class="panel-header">
+                <span>👥 Players</span>
+                <span id="playerCount">0/8</span>
+            </div>
+            <div class="players-list" id="playersList"></div>
+        </div>
+        <div class="chat-panel">
+            <div class="panel-header"><span>💬 Chat</span></div>
+            <div class="chat-messages" id="chatMessages"></div>
+            <div class="chat-input-row">
+                <input type="text" id="chatInput" placeholder="Type your guess..."
+                       maxlength="50" autocomplete="off" autocorrect="off"
+                       autocapitalize="off" spellcheck="false"
+                       inputmode="text" enterkeyhint="send">
+                <button class="send-btn" onclick="sendMessage()">➤</button>
+            </div>
+        </div>
+    </div>
+
+</div><!-- /#gameScreen -->
+
+<!-- ==================== POPUPS (outside game, fixed position) ==================== -->
+<div class="popup-backdrop" id="popupBackdrop" onclick="closePopups()"></div>
+
+<div class="popup" id="colorPopup">
+    <div class="popup-title">Color <button class="popup-close" onclick="closePopups()">✕</button></div>
+    <div class="color-grid" id="colorGrid"></div>
+</div>
+
+<div class="popup" id="sizePopup">
+    <div class="popup-title">Brush Size <button class="popup-close" onclick="closePopups()">✕</button></div>
+    <div class="size-options" id="sizeOptions"></div>
+</div>
+
+<!-- ==================== WORD MODAL ==================== -->
+<div class="modal-overlay" id="wordModal">
+    <div class="word-selection">
+        <div class="modal-header">
+            <h2>Choose a word to draw</h2>
+            <div class="modal-timer" id="wordTimer">15</div>
+        </div>
+        <div class="word-options" id="wordOptions"></div>
+    </div>
+</div>
+
+<!-- ==================== GAME OVER MODAL ==================== -->
+<div class="game-over-modal" id="gameOverModal">
+    <div class="game-over-content">
+        <div class="trophy">🏆</div>
+        <h1>Game Over!</h1>
+        <div class="winner-display" id="winnerDisplay"></div>
+        <div class="final-scores" id="finalScores"></div>
+        <p class="auto-restart-text" id="autoRestartText">New game starts in 10...</p>
+        <div class="game-over-actions">
+            <button onclick="playAgain()" class="play-again-btn primary">🔄 Play Again</button>
+            <button onclick="location.reload()" class="play-again-btn secondary">🏠 Menu</button>
+        </div>
+    </div>
+</div>
+
+<!-- ==================== MISC ==================== -->
+<div class="toast-container" id="toastContainer"></div>
+
+<div class="loading-overlay" id="loadingOverlay">
+    <div class="loading-spinner"></div>
+    <div class="loading-text">Connecting...</div>
+</div>
+
+<!-- Audio -->
+<audio id="soundJoin"     preload="auto"><source src="https://files.catbox.moe/8jc19e.wav"  type="audio/wav"></audio>
+<audio id="soundCorrect"  preload="auto"><source src="https://files.catbox.moe/7hoc5m.mp3"  type="audio/mpeg"></audio>
+<audio id="soundRoundEnd" preload="auto"><source src="https://files.catbox.moe/1t26uq.wav"  type="audio/wav"></audio>
+<audio id="soundLeave"    preload="auto"><source src="https://files.catbox.moe/zhrjcv.wav"  type="audio/wav"></audio>
+<audio id="soundEnter"    preload="auto"><source src="https://files.catbox.moe/y05klm.mp3"  type="audio/mpeg"></audio>
+
+<!-- Firebase -->
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
+<script src="firebase-config.js"></script>
+<script src="words.js"></script>
+<script src="game.js"></script>
 </body>
 </html>
