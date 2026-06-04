@@ -2,295 +2,359 @@
 <html lang="en">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, viewport-fit=cover">
-    <meta name="format-detection" content="telephone=no,date=no,email=no,address=no">
-    <meta name="HandheldFriendly" content="true">
-    <meta name="MobileOptimized" content="width">
-    <meta name="theme-color" content="#1a252f">
-    <title>Skribbl.io 28</title>
-    <link rel="stylesheet" href="style.css">
-    <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@400;600;700;800&display=swap" rel="stylesheet">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Marvel Cinematic Universe & X-Men Tracker</title>
+    <style>
+        :root {
+            --bg-color: #0f0f12;
+            --card-bg: #1a1a24;
+            --accent-color: #e50914;
+            --text-main: #ffffff;
+            --text-muted: #8a8a9e;
+            --toast-bg: #2e7d32;
+        }
+
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background-color: var(--bg-color);
+            color: var(--text-main);
+            margin: 0;
+            padding: 20px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+        }
+
+        header {
+            text-align: center;
+            margin-bottom: 40px;
+        }
+
+        h1 {
+            color: var(--accent-color);
+            font-size: 2.5rem;
+            text-transform: uppercase;
+            letter-spacing: 2px;
+            margin-bottom: 5px;
+        }
+
+        p.subtitle {
+            color: var(--text-muted);
+            font-size: 1rem;
+        }
+
+        .container {
+            width: 100%;
+            max-width: 1200px;
+        }
+
+        .phase-section {
+            margin-bottom: 50px;
+        }
+
+        .phase-title {
+            font-size: 1.8rem;
+            border-left: 5px solid var(--accent-color);
+            padding-left: 15px;
+            margin-bottom: 20px;
+            color: #f1f1f1;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+        }
+
+        .card {
+            background-color: var(--card-bg);
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 4px 10px rgba(0,0,0,0.3);
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            border: 1px solid #2a2a35;
+            transition: transform 0.2s, border-color 0.2s;
+        }
+
+        .card:hover {
+            transform: translateY(-2px);
+            border-color: var(--accent-color);
+        }
+
+        .card-header {
+            display: flex;
+            align-items: flex-start;
+            gap: 12px;
+            margin-bottom: 15px;
+        }
+
+        .number {
+            background-color: var(--accent-color);
+            color: white;
+            font-weight: bold;
+            padding: 4px 8px;
+            border-radius: 4px;
+            font-size: 0.85rem;
+            min-width: 20px;
+            text-align: center;
+        }
+
+        .title {
+            font-size: 1.1rem;
+            font-weight: 600;
+            cursor: pointer;
+            transition: color 0.2s;
+            line-height: 1.4;
+        }
+
+        .title:hover {
+            color: #ff4d4d;
+            text-decoration: underline;
+        }
+
+        .filename-wrapper {
+            background: #0b0b0d;
+            padding: 8px 12px;
+            border-radius: 6px;
+            font-family: 'Courier New', Courier, monospace;
+            font-size: 0.85rem;
+            color: var(--text-muted);
+            cursor: pointer;
+            word-break: break-all;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            border: 1px solid #22222b;
+            transition: background 0.2s;
+        }
+
+        .filename-wrapper:hover {
+            background: #15151a;
+            color: var(--text-main);
+        }
+
+        /* Toast Notification */
+        #toast {
+            visibility: hidden;
+            min-width: 250px;
+            background-color: var(--toast-bg);
+            color: #fff;
+            text-align: center;
+            border-radius: 4px;
+            padding: 16px;
+            position: fixed;
+            z-index: 1000;
+            right: 30px;
+            top: 30px;
+            font-size: 0.95rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.5);
+            font-weight: bold;
+        }
+
+        #toast.show {
+            visibility: visible;
+            animation: fadein 0.3s, fadeout 0.3s 2s;
+        }
+
+        @keyframes fadein {
+            from { top: 0; opacity: 0; }
+            to { top: 30px; opacity: 1; }
+        }
+
+        @keyframes fadeout {
+            from { top: 30px; opacity: 1; }
+            to { top: 0; opacity: 0; }
+        }
+    </style>
 </head>
 <body>
 
-<!-- ====================== LOGIN SCREEN ====================== -->
-<div id="loginScreen">
-    <div class="login-scroll">
-        <div class="login-container">
+    <header>
+        <h1>Marvel Media Database</h1>
+        <p class="subtitle">Click any Title or Poster Filename to instantly copy it.</p>
+    </header>
 
-            <div class="logo-section">
-                <div class="logo-icon">🎨</div>
-                <h1 class="logo-title">Skribbl.io 28</h1>
-                <p class="logo-tagline">Draw, guess, and have fun with friends!</p>
-            </div>
+    <div class="container" id="content-container"></div>
 
-            <div class="login-box">
-                <div class="input-group">
-                    <label for="playerName">Your Name</label>
-                    <input type="text" id="playerName"
-                           placeholder="Enter your name..."
-                           maxlength="12"
-                           autocomplete="off"
-                           autocorrect="off"
-                           autocapitalize="off"
-                           spellcheck="false">
-                    <span class="input-hint">Max 12 characters</span>
-                </div>
+    <div id="toast">Copied to clipboard!</div>
 
-                <div class="input-group">
-                    <label for="roomCode">Room Code</label>
-                    <input type="text" id="roomCode"
-                           placeholder="Leave empty to create new room"
-                           maxlength="8"
-                           autocomplete="off"
-                           autocorrect="off"
-                           autocapitalize="characters"
-                           spellcheck="false">
-                    <span class="input-hint">Enter code to join an existing room</span>
-                </div>
+    <script>
+        const data = [
+            {
+                phase: "MCU Phase 1",
+                movies: [
+                    { id: "1", title: "Iron Man (2008)", file: "posters/iron-man.png" },
+                    { id: "2", title: "The Incredible Hulk (2008)", file: "posters/the-incredible-hulk.png" },
+                    { id: "3", title: "Iron Man 2 (2010)", file: "posters/iron-man-2.png" },
+                    { id: "4", title: "Thor (2011)", file: "posters/thor.png" },
+                    { id: "5", title: "Captain America: The First Avenger (2011)", file: "posters/captain-america-the-first-avenger.png" },
+                    { id: "6", title: "The Avengers (2012)", file: "posters/the-avengers.png" }
+                ]
+            },
+            {
+                phase: "MCU Phase 2",
+                movies: [
+                    { id: "7", title: "Iron Man 3 (2013)", file: "posters/iron-man-3.png" },
+                    { id: "8", title: "Thor: The Dark World (2013)", file: "posters/thor-the-dark-world.png" },
+                    { id: "9", title: "Captain America: The Winter Soldier (2014)", file: "posters/captain-america-the-winter-soldier.png" },
+                    { id: "10", title: "Guardians of the Galaxy (2014)", file: "posters/guardians-of-the-galaxy.png" },
+                    { id: "11", title: "Avengers: Age of Ultron (2015)", file: "posters/avengers-age-of-ultron.png" },
+                    { id: "12", title: "Ant-Man (2015)", file: "posters/ant-man.png" }
+                ]
+            },
+            {
+                phase: "MCU Phase 3",
+                movies: [
+                    { id: "13", title: "Captain America: Civil War (2016)", file: "posters/captain-america-civil-war.png" },
+                    { id: "14", title: "Doctor Strange (2016)", file: "posters/doctor-strange.png" },
+                    { id: "15", title: "Guardians of the Galaxy 2 (2017)", file: "posters/guardians-of-the-galaxy-2.png" },
+                    { id: "16", title: "Spider-Man: Homecoming (2017)", file: "posters/spider-man-homecoming.png" },
+                    { id: "17", title: "Thor: Ragnarok (2017)", file: "posters/thor-ragnarok.png" },
+                    { id: "18", title: "Black Panther (2018)", file: "posters/black-panther.png" },
+                    { id: "19", title: "Avengers: Infinity War (2018)", file: "posters/avengers-infinity-war.png" },
+                    { id: "20", title: "Ant-Man and the Wasp (2018)", file: "posters/ant-man-and-the-wasp.png" },
+                    { id: "21", title: "Captain Marvel (2019)", file: "posters/captain-marvel.png" },
+                    { id: "22", title: "Avengers: Endgame (2019)", file: "posters/avengers-endgame.png" },
+                    { id: "23", title: "Spider-Man: Far From Home (2019)", file: "posters/spider-man-far-from-home.png" }
+                ]
+            },
+            {
+                phase: "MCU Phase 4",
+                movies: [
+                    { id: "24", title: "WandaVision (2021)", file: "posters/wandavision.png" },
+                    { id: "25", title: "Falcon and the Winter Soldier (2021)", file: "posters/falcon-and-the-winter-soldier.png" },
+                    { id: "26", title: "Loki season 1 (2021)", file: "posters/loki-season-1.png" },
+                    { id: "27", title: "Black Widow (2021)", file: "posters/black-widow.png" },
+                    { id: "28", title: "What If...? S01 (2021)", file: "posters/what-if-s01.png" },
+                    { id: "29", title: "Shang-Chi and the Legend of the Ten Rings (2021)", file: "posters/shang-chi-and-the-legend-of-the-ten-rings.png" },
+                    { id: "30", title: "Eternals (2021)", file: "posters/eternals.png" },
+                    { id: "31", title: "Hawkeye (2021)", file: "posters/hawkeye.png" },
+                    { id: "32", title: "Spider-Man: No Way Home (2021)", file: "posters/spider-man-no-way-home.png" },
+                    { id: "33", title: "Moon Knight (2022)", file: "posters/moon-knight.png" },
+                    { id: "34", title: "Doctor Strange in the Multiverse of Madness (2022)", file: "posters/doctor-strange-in-the-multiverse-of-madness.png" },
+                    { id: "35", title: "Ms. Marvel (2022)", file: "posters/ms-marvel.png" },
+                    { id: "36", title: "Thor: Love and Thunder (2022)", file: "posters/thor-love-and-thunder.png" },
+                    { id: "37", title: "I Am Groot (2022)", file: "posters/i-am-groot.png" },
+                    { id: "38", title: "She-Hulk (2022)", file: "posters/she-hulk.png" },
+                    { id: "39", title: "Werewolf By Night (2022)", file: "posters/werewolf-by-night.png" },
+                    { id: "40", title: "Black Panther: Wakanda Forever (2022)", file: "posters/black-panther-wakanda-forever.png" },
+                    { id: "41", title: "Guardians of the Galaxy Christmas Special (2022)", file: "posters/guardians-of-the-galaxy-christmas-special.png" }
+                ]
+            },
+            {
+                phase: "MCU Phase 5",
+                movies: [
+                    { id: "42", title: "Ant-Man and the Wasp: Quantumania (2023)", file: "posters/ant-man-and-the-wasp-quantumania.png" },
+                    { id: "43", title: "Guardians of the Galaxy 3 (2023)", file: "posters/guardians-of-the-galaxy-3.png" },
+                    { id: "44", title: "Secret Invasion (2023)", file: "posters/secret-invasion.png" },
+                    { id: "45", title: "I Am Groot S02 (2023)", file: "posters/i-am-groot-s02.png" },
+                    { id: "46", title: "Loki season 2 (2023)", file: "posters/loki-season-2.png" },
+                    { id: "47", title: "The Marvels (2023)", file: "posters/the-marvels.png" },
+                    { id: "48", title: "What If...? season 2 (2023)", file: "posters/what-if-season-2.png" },
+                    { id: "49", title: "Echo (2024)", file: "posters/echo.png" },
+                    { id: "50", title: "Deadpool & Wolverine (2024)", file: "posters/deadpool-wolverine.png" },
+                    { id: "51", title: "Agatha All Along (2024)", file: "posters/agatha-all-along.png" },
+                    { id: "52", title: "What If...? season 3 (2024)", file: "posters/what-if-season-3.png" },
+                    { id: "53", title: "Captain America: Brave New World (2025)", file: "posters/captain-america-brave-new-world.png" },
+                    { id: "54", title: "Daredevil: Born Again S01 (2025)", file: "posters/daredevil-born-again-s01.png" },
+                    { id: "55", title: "Thunderbolts* (2025)", file: "posters/thunderbolts.png" },
+                    { id: "56", title: "Ironheart S01 (2025)", file: "posters/ironheart-s01.png" }
+                ]
+            },
+            {
+                phase: "MCU Phase 6",
+                movies: [
+                    { id: "57", title: "The Fantastic Four: First Steps (2025)", file: "posters/the-fantastic-four-first-steps.png" },
+                    { id: "58", title: "Eyes of Wakanda S01 (2025)", file: "posters/eyes-of-wakanda-s01.png" },
+                    { id: "59", title: "Marvel Zombies S01 (2025)", file: "posters/marvel-zombies-s01.png" },
+                    { id: "60", title: "Wonder Man S01 (2026)", file: "posters/wonder-man-s01.png" },
+                    { id: "61", title: "Daredevil: Born Again S02 (2026)", file: "posters/wonder-man-s01.png" },
+                    { id: "62", title: "The Punisher: One Last Kill (2026)", file: "posters/the-punisher-one-last-kill.png" }
+                ]
+            },
+            {
+                phase: "X-Men Franchise",
+                movies: [
+                    { id: "63", title: "X-Men (2000)", file: "posters/x-men.png" },
+                    { id: "64", title: "X2: X-Men United (2003)", file: "posters/x2-x-men-united.png" },
+                    { id: "65", title: "X-Men: The Last Stand (2006)", file: "posters/x-men-the-last-stand.png" },
+                    { id: "66", title: "X-Men Origins: Wolverine (2009)", file: "posters/x-men-origins-wolverine.png" },
+                    { id: "67", title: "X-Men: First Class (2011)", file: "posters/x-men-first-class.png" },
+                    { id: "68", title: "The Wolverine (2013)", file: "posters/the-wolverine.png" },
+                    { id: "69", title: "X-Men: Days of Future Past (2014)", file: "posters/x-men-days-of-future-past.png" },
+                    { id: "70", title: "Deadpool (2016)", file: "posters/deadpool.png" },
+                    { id: "71", title: "X-Men: Apocalypse (2016)", file: "posters/x-men-apocalypse.png" },
+                    { id: "72", title: "Logan (2017)", file: "posters/logan.png" },
+                    { id: "73", title: "Deadpool 2 (2018)", file: "posters/deadpool-2.png" },
+                    { id: "74", title: "Dark Phoenix (2019)", file: "posters/dark-phoenix.png" },
+                    { id: "75", title: "The New Mutants (2020)", file: "posters/the-new-mutants.png" }
+                ]
+            }
+        ];
 
-                <button onclick="joinGame()" class="play-btn">
-                    <span class="play-btn-text">Play Now</span>
-                    <span class="play-btn-icon">🚀</span>
-                </button>
+        const container = document.getElementById('content-container');
+        const toast = document.getElementById('toast');
 
-                <div class="login-features">
-                    <div class="login-feature-item">
-                        <span class="feature-icon">✏️</span>
-                        <span class="feature-text">Real-time drawing</span>
-                    </div>
-                    <div class="login-feature-item">
-                        <span class="feature-icon">💬</span>
-                        <span class="feature-text">Live chat</span>
-                    </div>
-                    <div class="login-feature-item">
-                        <span class="feature-icon">🏆</span>
-                        <span class="feature-text">Score points</span>
-                    </div>
-                </div>
-            </div>
+        // Function to handle modern clipboard copy and trigger custom toast notification
+        function copyToClipboard(text) {
+            navigator.clipboard.writeText(text).then(() => {
+                toast.textContent = `Copied: "${text}"`;
+                toast.className = "show";
+                setTimeout(() => { toast.className = toast.className.replace("show", ""); }, 2300);
+            }).catch(err => {
+                console.error('Could not copy text: ', err);
+            });
+        }
 
-            <p class="footer-text">Made with ❤️ | Free to play</p>
+        // Build the structure dynamically
+        data.forEach(group => {
+            const section = document.createElement('div');
+            section.className = 'phase-section';
 
-        </div>
-    </div>
-</div>
+            const heading = document.createElement('h2');
+            heading.className = 'phase-title';
+            heading.textContent = group.phase;
+            section.appendChild(heading);
 
-<!-- ====================== GAME SCREEN ====================== -->
-<div id="gameScreen">
+            const grid = document.createElement('div');
+            grid.className = 'grid';
 
-    <!-- TOP BAR -->
-    <div class="top-bar" id="topBar">
-        <div class="top-left">
-            <button class="home-btn" onclick="exitGame()" title="Leave Game">🏠</button>
-        </div>
+            group.movies.forEach(movie => {
+                const card = document.createElement('div');
+                card.className = 'card';
 
-        <div class="top-center">
-            <div class="game-status-row">
-                <span class="round-info" id="roundInfo">Round 1/10</span>
-                <span class="status-divider">|</span>
-                <span class="timer-display" id="timerDisplay">80</span>
-                <span class="timer-label">s</span>
-            </div>
-            <div class="word-display-area">
-                <span class="word-display" id="wordDisplay">Waiting for players...</span>
-            </div>
-        </div>
+                const header = document.createElement('div');
+                header.className = 'card-header';
 
-        <div class="top-right">
-            <div class="room-code-badge">
-                <span class="room-code-label">ROOM</span>
-                <span class="room-code-value" id="roomCodeDisplay">----</span>
-            </div>
-        </div>
-    </div>
+                const num = document.createElement('span');
+                num.className = 'number';
+                num.textContent = movie.id;
 
-    <!-- CANVAS WRAPPER -->
-    <div class="canvas-wrapper" id="canvasWrapper">
-        <canvas id="gameCanvas"></canvas>
+                const title = document.createElement('div');
+                title.className = 'title';
+                title.textContent = movie.title;
+                title.title = "Click to copy title";
+                title.addEventListener('click', () => copyToClipboard(movie.title));
 
-        <!-- Drawer badge -->
-        <div class="drawer-badge" id="drawerBadge">
-            <span>✏️</span>
-            <span>You are drawing!</span>
-        </div>
+                header.appendChild(num);
+                header.appendChild(title);
 
-        <!-- Waiting overlay (shown to guessers while drawer picks word) -->
-        <div class="waiting-overlay" id="waitingOverlay">
-            <div class="waiting-inner">
-                <div class="waiting-spinner"></div>
-                <p class="waiting-text">Waiting for drawer to choose a word...</p>
-            </div>
-        </div>
+                const fileWrapper = document.createElement('div');
+                fileWrapper.className = 'filename-wrapper';
+                fileWrapper.textContent = movie.file;
+                fileWrapper.title = "Click to copy filename";
+                fileWrapper.addEventListener('click', () => copyToClipboard(movie.file));
 
-        <!-- Waiting for players overlay -->
-        <div class="lobby-overlay" id="lobbyOverlay">
-            <div class="lobby-inner">
-                <div class="lobby-icon">👥</div>
-                <p class="lobby-title">Waiting for players...</p>
-                <p class="lobby-sub">Need at least 2 players to start</p>
-                <div class="lobby-room-display">
-                    Room Code: <strong id="lobbyRoomCode">----</strong>
-                </div>
-            </div>
-        </div>
+                card.appendChild(header);
+                card.appendChild(fileWrapper);
+                grid.appendChild(card);
+            });
 
-        <!-- Round end overlay -->
-        <div class="round-end-overlay" id="roundEndOverlay">
-            <div class="round-end-card">
-                <div class="round-end-title">⏱ Round Over!</div>
-                <div class="round-end-word-label">The word was:</div>
-                <div class="round-end-word" id="revealedWord">---</div>
-                <div class="round-end-scores" id="roundScoresList"></div>
-            </div>
-        </div>
-
-    </div><!-- /#canvasWrapper -->
-
-    <!-- TOOLBAR (only shown for drawer) -->
-    <div class="toolbar-bar" id="toolbarBar">
-        <div class="toolbar-inner">
-            <button class="tool-btn" id="colorBtn" title="Pick Color">
-                <div class="color-dot" id="colorDot"></div>
-            </button>
-            <button class="tool-btn" id="sizeBtn" title="Brush Size">⚫</button>
-            <button class="tool-btn tool-active" id="brushBtn" title="Brush">✏️</button>
-            <button class="tool-btn" id="eraserBtn" title="Eraser">🧼</button>
-            <button class="tool-btn" id="bucketBtn" title="Fill">🪣</button>
-            <div class="toolbar-divider"></div>
-            <button class="tool-btn" id="undoBtn" title="Undo">↩️</button>
-            <button class="tool-btn tool-danger" id="clearBtn" title="Clear Canvas">🗑️</button>
-        </div>
-    </div>
-
-    <!-- BOTTOM SECTION: players + chat -->
-    <div class="bottom-bar" id="bottomBar">
-
-        <!-- Players panel -->
-        <div class="players-panel">
-            <div class="panel-header players-header">
-                <span class="panel-header-title">👥 Players</span>
-                <span class="player-count" id="playerCount">0/8</span>
-            </div>
-            <div class="players-list" id="playersList">
-                <!-- player items injected by JS -->
-            </div>
-        </div>
-
-        <!-- Chat panel -->
-        <div class="chat-panel">
-            <div class="panel-header chat-header">
-                <span class="panel-header-title">💬 Chat & Guesses</span>
-            </div>
-            <div class="chat-messages" id="chatMessages">
-                <!-- messages injected by JS -->
-            </div>
-            <div class="chat-input-row" id="chatInputRow">
-                <input
-                    type="text"
-                    id="chatInput"
-                    class="chat-input"
-                    placeholder="Type your guess here..."
-                    maxlength="50"
-                    autocomplete="off"
-                    autocorrect="off"
-                    autocapitalize="off"
-                    spellcheck="false"
-                    inputmode="text"
-                    enterkeyhint="send"
-                />
-                <button class="chat-send-btn" onclick="sendMessage()" id="sendBtn">➤</button>
-            </div>
-        </div>
-
-    </div><!-- /#bottomBar -->
-
-</div><!-- /#gameScreen -->
-
-<!-- ====================== COLOR POPUP ====================== -->
-<div class="popup-backdrop" id="popupBackdrop" onclick="closePopups()"></div>
-
-<div class="color-popup popup" id="colorPopup">
-    <div class="popup-header">
-        <span class="popup-title-text">🎨 Choose Color</span>
-        <button class="popup-close-btn" onclick="closePopups()">✕</button>
-    </div>
-    <div class="color-grid" id="colorGrid">
-        <!-- color swatches injected by JS -->
-    </div>
-</div>
-
-<div class="size-popup popup" id="sizePopup">
-    <div class="popup-header">
-        <span class="popup-title-text">⚫ Brush Size</span>
-        <button class="popup-close-btn" onclick="closePopups()">✕</button>
-    </div>
-    <div class="size-options-list" id="sizeOptionsList">
-        <!-- size options injected by JS -->
-    </div>
-</div>
-
-<!-- ====================== WORD SELECTION MODAL ====================== -->
-<div class="modal-overlay" id="wordModal">
-    <div class="word-modal-card">
-        <div class="word-modal-header">
-            <h2 class="word-modal-title">Choose a word to draw!</h2>
-            <div class="word-modal-timer" id="wordModalTimer">15</div>
-        </div>
-        <p class="word-modal-hint">Pick wisely — others will try to guess it!</p>
-        <div class="word-options-list" id="wordOptionsList">
-            <!-- word buttons injected by JS -->
-        </div>
-    </div>
-</div>
-
-<!-- ====================== GAME OVER MODAL ====================== -->
-<div class="gameover-overlay" id="gameOverModal">
-    <div class="gameover-card">
-        <div class="gameover-trophy">🏆</div>
-        <h1 class="gameover-title">Game Over!</h1>
-
-        <div class="gameover-winner" id="gameOverWinner">
-            <!-- winner info injected by JS -->
-        </div>
-
-        <div class="gameover-scores-wrap">
-            <h3 class="gameover-scores-title">Final Scores</h3>
-            <div class="gameover-scores-list" id="gameOverScores">
-                <!-- scores injected by JS -->
-            </div>
-        </div>
-
-        <p class="gameover-auto-restart" id="gameOverRestartText">New game starts in 10...</p>
-
-        <div class="gameover-actions">
-            <button class="gameover-btn gameover-btn-primary" onclick="playAgain()">🔄 Play Again</button>
-            <button class="gameover-btn gameover-btn-secondary" onclick="location.reload()">🏠 Main Menu</button>
-        </div>
-    </div>
-</div>
-
-<!-- ====================== TOAST NOTIFICATIONS ====================== -->
-<div class="toast-container" id="toastContainer"></div>
-
-<!-- ====================== LOADING OVERLAY ====================== -->
-<div class="loading-overlay" id="loadingOverlay">
-    <div class="loading-spinner"></div>
-    <p class="loading-text">Connecting to server...</p>
-</div>
-
-<!-- ====================== AUDIO ====================== -->
-<audio id="soundJoin"     preload="auto"><source src="https://files.catbox.moe/8jc19e.wav"  type="audio/wav"></audio>
-<audio id="soundCorrect"  preload="auto"><source src="https://files.catbox.moe/7hoc5m.mp3"  type="audio/mpeg"></audio>
-<audio id="soundRoundEnd" preload="auto"><source src="https://files.catbox.moe/1t26uq.wav"  type="audio/wav"></audio>
-<audio id="soundLeave"    preload="auto"><source src="https://files.catbox.moe/zhrjcv.wav"  type="audio/wav"></audio>
-<audio id="soundEnter"    preload="auto"><source src="https://files.catbox.moe/y05klm.mp3"  type="audio/mpeg"></audio>
-
-<!-- ====================== SCRIPTS ====================== -->
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.8.0/firebase-database-compat.js"></script>
-<script src="firebase-config.js"></script>
-<script src="words.js"></script>
-<script src="game.js"></script>
+            section.appendChild(grid);
+            container.appendChild(section);
+        });
+    </script>
 </body>
 </html>
