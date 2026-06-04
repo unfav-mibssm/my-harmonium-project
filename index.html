@@ -173,7 +173,7 @@
 
     <header>
         <h1>Marvel Media Database</h1>
-        <p class="subtitle">Click any Title or Poster Filename to instantly copy it.</p>
+        <p class="subtitle">Click any Title to copy it with "backdrops" appended, or click the Filename to copy it directly.</p>
     </header>
 
     <div class="container" id="content-container"></div>
@@ -333,8 +333,10 @@
                 const title = document.createElement('div');
                 title.className = 'title';
                 title.textContent = movie.title;
-                title.title = "Click to copy title";
-                title.addEventListener('click', () => copyToClipboard(movie.title));
+                title.title = "Click to copy title with 'backdrops'";
+                
+                // Modifying copy handler here to append " backdrops"
+                title.addEventListener('click', () => copyToClipboard(`${movie.title} backdrops`));
 
                 header.appendChild(num);
                 header.appendChild(title);
